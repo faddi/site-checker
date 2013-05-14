@@ -1,4 +1,3 @@
 site-checker
 ============
 
-test
