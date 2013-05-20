@@ -1,23 +1,22 @@
 package checker
 
 import (
+    "net/http"
+    "net/http/httptest"
     "testing"
     "time"
-    "net/http/httptest"
-    "net/http"
-//    "fmt"
 )
 
 var curl string = "http://www.example.com"
-var delay time.Duration = 2
+var delay time.Duration = 2 *time.Second
 
 func failTimer(t *testing.T) {
-    time.AfterFunc(20 * time.Second, func(){
+    time.AfterFunc(20*time.Second, func() {
         t.Fatal("Test did not complete in 20 seconds")
     })
 }
 
-func Test_New(t *testing.T){
+func Test_New(t *testing.T) {
     c := New()
 
     if c == nil {
@@ -29,7 +28,7 @@ func Test_New(t *testing.T){
     }
 }
 
-func Test_AddUrl(t *testing.T){
+func Test_AddUrl(t *testing.T) {
     failTimer(t)
     c := New()
 
@@ -51,7 +50,7 @@ func Test_AddUrl(t *testing.T){
 
 }
 
-func Test_StopUrl(t *testing.T){
+func Test_StopUrl(t *testing.T) {
     failTimer(t)
     c := New()
 
@@ -72,7 +71,7 @@ func Test_StopUrl(t *testing.T){
     }
 }
 
-func Test_Multiple(t *testing.T){
+func Test_Multiple(t *testing.T) {
     failTimer(t)
     c := New()
 
@@ -84,7 +83,7 @@ func Test_Multiple(t *testing.T){
         }
     }
 
-    go func () {
+    go func() {
         out := c.out
         for {
             d := <-out
@@ -109,10 +108,8 @@ func Test_Multiple(t *testing.T){
 }
 
 func Test_Redirect(t *testing.T) {
-
     failTimer(t)
 
-    // move this to eash test
     ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
     }))
@@ -135,16 +132,32 @@ func Test_Redirect(t *testing.T) {
     }
 
     t.Log(res.Resp.Status)
-
-    //func Redirect(w ResponseWriter, r *Request, urlStr string, code int)
-
-
 }
 
+func Test_404(t *testing.T) {
+    failTimer(t)
 
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        http.NotFound(w, r)
+    }))
+    defer ts.Close()
 
+    c := New()
 
+    err := c.AddUrl(ts.URL, delay)
 
-/*func Test_blah(t *testing.T){
-    t.Error("dasd")
-}*/
+    if err != nil {
+        t.Error(err)
+    }
+
+    res := <-c.ResultChan()
+
+    err = c.StopCheckingUrl(ts.URL)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    t.Log(res.Resp.Status)
+    t.Log("%v", res.Resp)
+}

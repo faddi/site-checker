@@ -2,24 +2,24 @@ package checker
 
 import (
     "errors"
+    stdlog "log"
     "net/http"
     "net/url"
-    stdlog "log"
     "os"
     "time"
 )
 
 var l *stdlog.Logger
 
-func init (){
+func init() {
 
     /*logfile, err := os.Create("checker.log")
 
-    if err != nil {
-        stdlog.Fatalln(err)
-    }*/
+      if err != nil {
+          stdlog.Fatalln(err)
+      }*/
 
-    l = stdlog.New(os.Stdout, "", stdlog.LstdFlags | stdlog.Lshortfile)
+    l = stdlog.New(os.Stdout, "", stdlog.LstdFlags|stdlog.Lshortfile)
 }
 
 func log(format string, v ...interface{}) {
@@ -27,8 +27,8 @@ func log(format string, v ...interface{}) {
 }
 
 type CheckResult struct {
-    Resp *http.Response
-    Body []byte
+    Resp       *http.Response
+    Body       []byte
     Connecting time.Duration
     Receiving  time.Duration
     Timestamp  time.Time
@@ -37,9 +37,10 @@ type CheckResult struct {
 
 type Checker struct {
     sites map[string]*site
-    out chan *CheckResult
+    out   chan *CheckResult
 }
 
+// Initiates a new Checker
 func New() *Checker {
 
     c := new(Checker)
@@ -51,7 +52,7 @@ func New() *Checker {
     return c
 }
 
-func (c *Checker) AddUrl(rawUrl string, delay time.Duration ) (error) {
+func (c *Checker) AddUrl(rawUrl string, delay time.Duration) error {
 
     log("Adding url: %s\n", rawUrl)
 
@@ -77,7 +78,6 @@ func (c *Checker) AddUrl(rawUrl string, delay time.Duration ) (error) {
 func (c *Checker) ResultChan() <-chan *CheckResult {
     return c.out
 }
-
 
 func (c *Checker) StopCheckingUrl(rawUrl string) error {
 

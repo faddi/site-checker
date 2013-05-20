@@ -2,10 +2,10 @@ package checker
 
 import (
     "errors"
-    "time"
+    "io/ioutil"
     "net/http"
     "net/url"
-    "io/ioutil"
+    "time"
 )
 
 type site struct {
@@ -29,21 +29,20 @@ func newSite(u *url.URL, delay time.Duration, out chan *CheckResult) *site {
 }
 
 func checkRedirect(req *http.Request, via []*http.Request) error {
-
     return errors.New("")
 }
 
 func (s *site) start() {
 
-    log("Checking site %s every %d seconds\n", s.url.String(), s.delay)
-    t := time.Tick(s.delay * time.Second)
+    log("Checking site %s every %f seconds\n", s.url.String(), s.delay.Seconds())
+    t := time.Tick(s.delay)
 
     for {
         select {
-            case _ = <-t:
-                s.check()
-            case _ = <-s.stop:
-                return
+        case _ = <-t:
+            s.check()
+        case _ = <-s.stop:
+            return
         }
     }
 }
@@ -57,8 +56,7 @@ func (s *site) check() {
     connect_time := time.Now()
 
     if err != nil {
-        if _, ok := err.(*url.Error); ok == false{
-            log("regular err")
+        if _, ok := err.(*url.Error); ok == false {
             log("err : " + err.Error())
             return
         }
@@ -80,5 +78,5 @@ func (s *site) check() {
         return
     }
 
-    s.out <- &CheckResult{Resp: resp, Body: data, Connecting: connect_time.Sub(start), Receiving: rcv_time.Sub(connect_time), Timestamp : start, Url : s.url.String()}
+    s.out <- &CheckResult{Resp: resp, Body: data, Connecting: connect_time.Sub(start), Receiving: rcv_time.Sub(connect_time), Timestamp: start, Url: s.url.String()}
 }
