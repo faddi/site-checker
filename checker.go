@@ -78,9 +78,6 @@ func (c *Checker) ResultChan() <-chan *CheckResult {
     return c.out
 }
 
-func checkRedirect(req *http.Request, via []*http.Request) error {
-    return nil
-}
 
 func (c *Checker) StopCheckingUrl(rawUrl string) error {
 

@@ -1,6 +1,7 @@
 package checker
 
 import (
+    "errors"
     "time"
     "net/http"
     "net/url"
@@ -27,6 +28,11 @@ func newSite(u *url.URL, delay time.Duration, out chan *CheckResult) *site {
     return s
 }
 
+func checkRedirect(req *http.Request, via []*http.Request) error {
+
+    return errors.New("")
+}
+
 func (s *site) start() {
 
     log("Checking site %s every %d seconds\n", s.url.String(), s.delay)
@@ -51,17 +57,26 @@ func (s *site) check() {
     connect_time := time.Now()
 
     if err != nil {
-        log(err.Error())
-        return
+        if _, ok := err.(*url.Error); ok == false{
+            log("regular err")
+            log("err : " + err.Error())
+            return
+        }
     }
 
-    data, err := ioutil.ReadAll(resp.Body)
+    err = nil
+
+    var data []byte
+
+    if resp.StatusCode % 300 > 99 {
+        data, err = ioutil.ReadAll(resp.Body)
+        defer resp.Body.Close()
+    }
+
     rcv_time := time.Now()
 
-    resp.Body.Close()
-
     if err != nil {
-        log(err.Error())
+        log("error when reading response body : %s", err.Error())
         return
     }
 

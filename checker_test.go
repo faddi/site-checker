@@ -3,10 +3,19 @@ package checker
 import (
     "testing"
     "time"
+    "net/http/httptest"
+    "net/http"
+//    "fmt"
 )
 
 var curl string = "http://www.example.com"
 var delay time.Duration = 2
+
+func failTimer(t *testing.T) {
+    time.AfterFunc(20 * time.Second, func(){
+        t.Fatal("Test did not complete in 20 seconds")
+    })
+}
 
 func Test_New(t *testing.T){
     c := New()
@@ -21,7 +30,7 @@ func Test_New(t *testing.T){
 }
 
 func Test_AddUrl(t *testing.T){
-
+    failTimer(t)
     c := New()
 
     if err := c.AddUrl("i am not a valid url", delay); err == nil {
@@ -43,7 +52,7 @@ func Test_AddUrl(t *testing.T){
 }
 
 func Test_StopUrl(t *testing.T){
-
+    failTimer(t)
     c := New()
 
     if err := c.AddUrl(curl, delay); err != nil {
@@ -64,7 +73,7 @@ func Test_StopUrl(t *testing.T){
 }
 
 func Test_Multiple(t *testing.T){
-
+    failTimer(t)
     c := New()
 
     urls := []string{curl, "http://www.google.com", "http://www.dn.se", "http://www.aftonbladet.se"}
@@ -98,6 +107,43 @@ func Test_Multiple(t *testing.T){
     }
 
 }
+
+func Test_Redirect(t *testing.T) {
+
+    failTimer(t)
+
+    // move this to eash test
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+    }))
+    defer ts.Close()
+
+    c := New()
+
+    err := c.AddUrl(ts.URL, delay)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    res := <-c.ResultChan()
+
+    err = c.StopCheckingUrl(ts.URL)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    t.Log(res.Resp.Status)
+
+    //func Redirect(w ResponseWriter, r *Request, urlStr string, code int)
+
+
+}
+
+
+
+
 
 /*func Test_blah(t *testing.T){
     t.Error("dasd")
