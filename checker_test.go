@@ -5,10 +5,19 @@ import (
     "net/http/httptest"
     "testing"
     "time"
+    stdlog "log"
+    "os"
 )
 
 var curl string = "http://www.example.com"
 var delay time.Duration = 2 *time.Second
+
+func init(){
+
+    l := stdlog.New(os.Stdout, "", stdlog.LstdFlags|stdlog.Lshortfile)
+
+    SetLogger(l)
+}
 
 func failTimer(t *testing.T) {
     time.AfterFunc(20*time.Second, func() {

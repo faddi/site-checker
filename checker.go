@@ -5,25 +5,19 @@ import (
     stdlog "log"
     "net/http"
     "net/url"
-    "os"
     "time"
 )
 
 var l *stdlog.Logger
 
-func init() {
-
-    /*logfile, err := os.Create("checker.log")
-
-      if err != nil {
-          stdlog.Fatalln(err)
-      }*/
-
-    l = stdlog.New(os.Stdout, "", stdlog.LstdFlags|stdlog.Lshortfile)
+func log(format string, v ...interface{}) {
+    if l != nil {
+        l.Printf(format, v...)
+    }
 }
 
-func log(format string, v ...interface{}) {
-    l.Printf(format, v...)
+func SetLogger(log *stdlog.Logger) {
+    l = log
 }
 
 type CheckResult struct {
