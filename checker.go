@@ -33,6 +33,7 @@ type CheckResult struct {
     Receiving  time.Duration
     Timestamp  time.Time
     Url        string
+    Error      error
 }
 
 type Checker struct {

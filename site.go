@@ -51,13 +51,18 @@ func (s *site) check() {
 
     log("Getting %s \n", s.url.String())
 
+    result := new(CheckResult)
+
     start := time.Now()
     resp, err := s.client.Get(s.url.String())
     connect_time := time.Now()
 
     if err != nil {
-        if _, ok := err.(*url.Error); ok == false {
+        if _, ok := err.(*url.Error); ok == false || resp == nil {
+            result.Error = err
             log("err : " + err.Error())
+
+            s.out <- result
             return
         }
     }
@@ -78,5 +83,12 @@ func (s *site) check() {
         return
     }
 
-    s.out <- &CheckResult{Resp: resp, Body: data, Connecting: connect_time.Sub(start), Receiving: rcv_time.Sub(connect_time), Timestamp: start, Url: s.url.String()}
+    result.Resp = resp
+    result.Body = data
+    result.Connecting = connect_time.Sub(start)
+    result.Receiving = rcv_time.Sub(connect_time)
+    result.Timestamp = start
+    result.Url = s.url.String()
+
+    s.out <- result
 }

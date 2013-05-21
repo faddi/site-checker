@@ -161,3 +161,30 @@ func Test_404(t *testing.T) {
     t.Log(res.Resp.Status)
     t.Log("%v", res.Resp)
 }
+
+func Test_NotExisting(t *testing.T) {
+    //failTimer(t)
+
+    c := New()
+
+    url := "http://fakelocalurl:12345"
+    //url := "http://www.google.com"
+
+    err := c.AddUrl(url, delay)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    res := <-c.ResultChan()
+
+    err = c.StopCheckingUrl(url)
+
+    if err != nil {
+        t.Error(err)
+    }
+
+    if res.Error == nil {
+        t.Error("Response should have an error when getting an url that doesn't exist")
+    }
+}
