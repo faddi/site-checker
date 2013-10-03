@@ -49,6 +49,10 @@ func New() *Checker {
 
 func (c *Checker) AddUrl(rawUrl string, delay time.Duration) error {
 
+    if delay.Seconds() < 1 {
+        return errors.New("To short delay, delay must be >= 1 s")
+    }
+
     log("Adding url: %s\n", rawUrl)
 
     u, err := url.Parse(rawUrl)
@@ -85,3 +89,19 @@ func (c *Checker) StopCheckingUrl(rawUrl string) error {
 
     return errors.New("Site " + rawUrl + " not found.")
 }
+
+func (c *Checker) Urls() []string {
+
+    ret := make([]string, len(c.sites))
+
+    var i int
+    for k, _ := range c.sites {
+        ret[i] = k
+        i++
+    }
+
+    return ret
+}
+
+
+

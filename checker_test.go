@@ -10,7 +10,7 @@ import (
 )
 
 var curl string = "http://www.example.com"
-var delay time.Duration = 2 *time.Second
+var delay time.Duration = 5 *time.Second
 
 func init(){
 
@@ -20,8 +20,8 @@ func init(){
 }
 
 func failTimer(t *testing.T) {
-    time.AfterFunc(20*time.Second, func() {
-        t.Fatal("Test did not complete in 20 seconds")
+    time.AfterFunc(10*time.Second, func() {
+        t.Fatal("Test did not complete in 10 seconds")
     })
 }
 
@@ -51,6 +51,7 @@ func Test_AddUrl(t *testing.T) {
 
     if err := c.AddUrl(curl, delay); err != nil {
         t.Error("Failed to add proper url")
+        t.Error(err.Error())
     }
 
     if _, ok := c.sites[curl]; ok != true {
@@ -65,14 +66,20 @@ func Test_StopUrl(t *testing.T) {
 
     if err := c.AddUrl(curl, delay); err != nil {
         t.Error("Failed to add proper url")
+        t.Error(err.Error())
     }
 
     time.Sleep(3 * time.Second)
-    log("%v\n", <-c.ResultChan())
+    go func () {
+        for {
+            log("%v\n", <-c.ResultChan())
+        }
+    }()
+
     err := c.StopCheckingUrl(curl)
 
     if err != nil {
-        t.Fatal(err)
+        t.Fatal(err.Error())
     }
 
     if _, ok := c.sites[curl]; ok == true {
@@ -88,7 +95,7 @@ func Test_Multiple(t *testing.T) {
 
     for _, u := range urls {
         if err := c.AddUrl(u, delay); err != nil {
-            t.Error("Failed to add proper url")
+            t.Error(err.Error())
         }
     }
 
