@@ -23,8 +23,7 @@ func SetLogger(log *stdlog.Logger) {
 type CheckResult struct {
     Resp       *http.Response
     Body       []byte
-    Connecting time.Duration
-    Receiving  time.Duration
+    ResponseTime time.Duration
     Timestamp  time.Time
     Url        string
     Error      error

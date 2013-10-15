@@ -55,7 +55,7 @@ func (s *site) check() {
 
     start := time.Now()
     resp, err := s.client.Get(s.url.String())
-    connect_time := time.Now()
+    end := time.Now()
 
     if err != nil {
         if _, ok := err.(*url.Error); ok == false || resp == nil {
@@ -76,7 +76,6 @@ func (s *site) check() {
         defer resp.Body.Close()
     }
 
-    rcv_time := time.Now()
 
     if err != nil {
         log("error when reading response body : %s", err.Error())
@@ -85,8 +84,7 @@ func (s *site) check() {
 
     result.Resp = resp
     result.Body = data
-    result.Connecting = connect_time.Sub(start)
-    result.Receiving = rcv_time.Sub(connect_time)
+    result.ResponseTime = end.Sub(start)
     result.Timestamp = start
     result.Url = s.url.String()
 
